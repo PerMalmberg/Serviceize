@@ -88,7 +88,7 @@ bool Application::InstallService(
 		}
 
 		auto bytesNeeded = charCount * sizeof( CharType );
-		bytesNeeded += 2 * sizeof( CharType ); // Add one for the double null-char
+		bytesNeeded += sizeof( CharType ); // Add one for the double null-char
 		auto deps = std::make_unique<CharType[]>( bytesNeeded );
 		ZeroMemory( deps.get(), bytesNeeded );
 
@@ -99,7 +99,7 @@ bool Application::InstallService(
 			auto curr = Process::ToWinAPI( d );
 			auto len = lstrlen( curr.get() );
 			StringCchCopy( deps.get() + offset, bytesNeeded - offset, curr.get() );
-			offset += len + sizeof( CharType ); // One for null-char
+			offset += len + 1; // One for null-char
 		}
 
 		AutoCloser<SC_HANDLE> sc(
