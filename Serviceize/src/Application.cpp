@@ -1,10 +1,17 @@
 
 #include <thread>
+#include <Strsafe.h>
 #include "Serviceize/Application.h"
 #include "Serviceize/AutoCloser.h"
 #include "Serviceize/Process.h"
 
 using namespace std::chrono_literals;
+
+#ifdef UNICODE
+using CharType = wchar_t;
+#else
+using CharType = char;
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -72,20 +79,17 @@ bool Application::InstallService(
 
 
 		// Create a single buffer containing the dependencies separated by a null-char
-		int size = 0;
+		int charCount = 0;
 
 		for( auto& d : dependencies )
 		{
 			auto curr = Process::ToWinAPI( d );
-			size += lstrlen( curr.get() ) + 1; // Add one for terminating null-char
+			charCount += lstrlen( curr.get() ) + 1; // Add one for terminating null-char
 		}
 
-		auto bytesNeeded = size + 1; // Add one for the double null-char
-#ifdef UNICODE
-		auto deps = std::make_unique<wchar_t>( bytesNeeded );
-#else
-		auto deps = std::make_unique<char>( bytesNeeded );
-#endif
+		auto bytesNeeded = charCount * sizeof( CharType );
+		bytesNeeded += 2 * sizeof( CharType ); // Add one for the double null-char
+		auto deps = std::make_unique<CharType[]>( bytesNeeded );
 		ZeroMemory( deps.get(), bytesNeeded );
 
 		// Copy data into the array, separated by a null-char
@@ -94,8 +98,8 @@ bool Application::InstallService(
 		{
 			auto curr = Process::ToWinAPI( d );
 			auto len = lstrlen( curr.get() );
-			CopyMemory( deps.get() + offset, curr.get(), len );
-			offset += len + 1; // One for null-char
+			StringCchCopy( deps.get() + offset, bytesNeeded - offset, curr.get() );
+			offset += len + sizeof( CharType ); // One for null-char
 		}
 
 		AutoCloser<SC_HANDLE> sc(

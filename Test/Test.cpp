@@ -62,7 +62,7 @@ SCENARIO( "Installing and deleting service" )
 					SERVICE_DEMAND_START,
 					"TestService",
 					"TestServiceDisplayName",
-					std::vector<std::string>{},
+					std::vector<std::string>{ "TeamViewer", "TeamViewer"},
 					"NT AUTHORITY\\LocalService",
 					"",
 					std::vector<std::string>{} ) 
