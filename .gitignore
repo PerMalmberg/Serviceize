@@ -34,4 +34,7 @@ build/*
 */x64/
 */dist/bin/*
 /Serviceize/build
+/Serviceize/.vs/
 *.db
+/Serviceize/Serviceize.vcxproj.user
+
