@@ -10,25 +10,12 @@
 
 using namespace std::chrono_literals;
 
-namespace std {
-template<>
-class default_delete< HANDLE >
-{
-public:
-	void operator()( HANDLE& h )
-	{
-		CloseHandle( h );
-	}
-};
-}
-
-
 SCENARIO( "Can run test project with arguments" )
 {
 	GIVEN( "A process object" )
 	{
 		Process proc{ 
-			"d:\\git\\Serviceize\\Test\\dist\\bin\\Debug\\Test.exe", 
+			Process::GetExecutableFullPath(), 
 			std::vector<std::string>{ "sleep2" } 
 		};
 

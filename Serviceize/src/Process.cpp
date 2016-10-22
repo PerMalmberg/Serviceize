@@ -155,5 +155,16 @@ bool Process::IsStillActive()
 	}
 	
 	return res;
+}
 
+///////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+///////////////////////////////////////////////////////////////////////////////
+std::string Process::GetExecutableFullPath()
+{
+	TCHAR path[MAX_PATH];
+	GetModuleFileName( NULL, path, MAX_PATH );
+	return Process::FromWinAPI( path );
 }

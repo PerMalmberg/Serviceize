@@ -26,6 +26,7 @@ public:
 
 	bool GetExitCode( int& exitCode );
 	bool IsStillActive();
+	static std::string GetExecutableFullPath();
 
 #ifdef UNICODE
 
