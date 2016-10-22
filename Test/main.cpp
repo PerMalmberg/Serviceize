@@ -15,9 +15,11 @@ int main( int argc, const char* argv[] )
 {
 	int result = 0;
 
-	if( argc > 1 && strstr( argv[1], "sleep2" ) ) {
-		std::this_thread::sleep_for( 2s );
-		result = 2;
+	if( argc > 1 ) {
+		if( strstr( argv[1], "sleep2" ) ) {
+			std::this_thread::sleep_for( 2s );
+			result = 2;
+		}
 	}
 	else {
 		result = result = Catch::Session().run( argc, argv );

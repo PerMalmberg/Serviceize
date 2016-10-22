@@ -9,9 +9,11 @@ set(SOURCE_FILES
         dist/include/Serviceize/Serviceize.h
 		dist/include/Serviceize/Application.h
 		dist/include/Serviceize/Process.h
+		dist/include/Serviceize/AutoCloser.h
         src/Serviceize.cpp
         src/Application.cpp
 		src/Process.cpp
+		
         )
 
 add_library(${PROJECT_NAME} STATIC ${SOURCE_FILES})

@@ -7,9 +7,10 @@
 #include <vector>
 #include <chrono>
 #include <Serviceize\Process.h>
+#include "TestApp.h"
 
 using namespace std::chrono_literals;
-
+/*
 SCENARIO( "Can run test project with arguments" )
 {
 	GIVEN( "A process object" )
@@ -46,3 +47,49 @@ SCENARIO( "File to execute doesn't exist" )
 		}		
 	}
 }
+*/
+SCENARIO( "Installing and deleting service" )
+{
+	GIVEN( "An application object" )
+	{
+		TestApp app( "." );
+
+		WHEN( "Installing service" )
+		{
+			THEN( "Service is installed" )
+			{
+				REQUIRE( app.InstallService(
+					SERVICE_DEMAND_START,
+					"TestService",
+					"TestServiceDisplayName",
+					std::vector<std::string>{},
+					"NT AUTHORITY\\LocalService",
+					"",
+					std::vector<std::string>{} ) 
+				);				
+			}
+			AND_THEN("Service is uninstalled")
+			{
+				REQUIRE( app.UninstallService( "TestService", 3s ) );
+			}
+		}
+	}
+}
+
+/*
+SCENARIO( "Stopping service" )
+{
+	GIVEN( "An application object" )
+	{
+		TestApp app( "." );
+
+		WHEN( "Stopping service" )
+		{
+			THEN( "Service is stopped" )
+			{
+				REQUIRE( app.StopService( "TeamViewer", 3s ) );
+			}
+		}
+	}
+}
+*/
