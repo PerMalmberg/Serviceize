@@ -33,3 +33,5 @@ build/*
 */Debug/
 */x64/
 */dist/bin/*
+/Serviceize/build
+*.db
