@@ -25,7 +25,7 @@ public:
 
 SCENARIO( "Can run test project with arguments" )
 {
-	GIVEN( "An application" )
+	GIVEN( "A process object" )
 	{
 		Process proc{ 
 			"d:\\git\\Serviceize\\Test\\dist\\bin\\Debug\\Test.exe", 
@@ -41,5 +41,20 @@ SCENARIO( "Can run test project with arguments" )
 			REQUIRE( proc.GetExitCode( exitCode ) );
 			REQUIRE( exitCode == 2 );
 		}
+	}
+}
+
+SCENARIO( "File to execute doesn't exist" )
+{
+	GIVEN( "A process object" )
+	{
+		Process proc{ "FileDoesNotExist" };
+
+		THEN( "When executed" )
+		{
+			REQUIRE_FALSE( proc.Execute() );
+			REQUIRE( proc.GetErrorCode() == ERROR_FILE_NOT_FOUND );
+		}
+		
 	}
 }

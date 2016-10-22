@@ -4,6 +4,10 @@
 
 #include <Serviceize/Process.h>
 
+Process::Process( const std::string& commandFile )
+	: Process( commandFile, std::vector<std::string>() )
+{
+}
 
 Process::Process( const std::string& commandFile, std::vector<std::string>& arguments )
 	: myCommandFile( commandFile ), myArguments( arguments )
