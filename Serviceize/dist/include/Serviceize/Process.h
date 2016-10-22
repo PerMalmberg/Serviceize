@@ -25,7 +25,7 @@ public:
 	DWORD GetErrorCode() const { return myLastError; }
 
 	bool GetExitCode( int& exitCode );
-	bool IsStillActive() const;
+	bool IsStillActive();
 
 #ifdef UNICODE
 
