@@ -38,7 +38,7 @@ int main( int argc, const char* argv[] )
 		else if( strcmp( argv[1], "start" ) == 0 )
 		{
 			TestApp app;
-			//qqq result = app.StartService() ? 0 : 1;
+			result = app.Start() ? 0 : 1;
 			std::cout << "Start: " << result << std::endl;
 		}
 		else if( strcmp( argv[1], "--runservice" ) )

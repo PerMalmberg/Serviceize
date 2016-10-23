@@ -67,6 +67,14 @@ SCENARIO( "Installing and uninstalling service" )
 			{
 				REQUIRE( app.InstallService() );
 			}
+			AND_THEN( "Service is started" )
+			{
+				REQUIRE( app.Start() );
+			}
+			AND_THEN( "Service is stopped" )
+			{
+				REQUIRE( app.Stop() );
+			}
 			AND_THEN( "Service is uninstalled" )
 			{
 				REQUIRE( app.UninstallService() );
@@ -75,20 +83,3 @@ SCENARIO( "Installing and uninstalling service" )
 	}
 }
 
-/*
-SCENARIO( "Stopping service" )
-{
-	GIVEN( "An application object" )
-	{
-		TestApp app;
-
-		WHEN( "Stopping service" )
-		{
-			THEN( "Service is stopped" )
-			{
-				REQUIRE( app.Stop( "TeamViewer", 3s ) );
-			}
-		}
-	}
-}
-*/

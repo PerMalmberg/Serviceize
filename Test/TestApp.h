@@ -12,5 +12,7 @@ public:
 
 	bool InstallService();
 	bool UninstallService();
+	bool Start();
+	bool Stop();
 };
 

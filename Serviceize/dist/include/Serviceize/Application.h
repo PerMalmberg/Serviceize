@@ -8,7 +8,7 @@
 #include <Windows.h>
 #include <string>
 #include <memory>
-#include "Serviceize/Serviceize.h"
+#include "Serviceize/ServiceController.h"
 
 // TODO: Signals, Control-C
 // https://msdn.microsoft.com/en-us/library/windows/desktop/ms683242.aspx
@@ -36,7 +36,7 @@ protected:
 #endif
 
 protected:
-	Serviceize myServiceizer;
+	ServiceController myServiceizer;
 
 	// When implemented in a derived class, executes when a Start command is  
 	// sent to the service by the SCM or when the operating system starts  
