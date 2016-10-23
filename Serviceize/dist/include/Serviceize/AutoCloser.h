@@ -5,6 +5,8 @@
 
 #include <functional>
 
+namespace serviceize {
+
 template< typename T>
 class AutoCloser
 {
@@ -25,3 +27,5 @@ private:
 	const T myT;
 	std::function<void( T )> myCloser;
 };
+
+}

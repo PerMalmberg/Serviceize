@@ -10,6 +10,8 @@
 #include <chrono>
 #include <memory>
 
+namespace serviceize {
+
 class Process
 {
 public:
@@ -21,7 +23,7 @@ public:
 	bool Execute();
 
 	bool WaitForTermination( std::chrono::milliseconds milliSeconds );
-	
+
 	DWORD GetErrorCode() const { return myLastError; }
 
 	bool GetExitCode( int& exitCode );
@@ -77,3 +79,4 @@ private:
 	DWORD myLastError = 0;
 };
 
+}

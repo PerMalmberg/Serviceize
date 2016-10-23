@@ -10,26 +10,30 @@
 #include "TestApp.h"
 
 using namespace std::chrono_literals;
-/*
+using namespace serviceize;
+
 SCENARIO( "Can run test project with arguments" )
 {
 	GIVEN( "A process object" )
 	{
-		Process proc{ 
-			Process::GetExecutableFullPath(), 
-			std::vector<std::string>{ "sleep2" } 
-		};
+		WHEN( "Setup with sleep2 argument" )
+		{
+			Process proc{
+				Process::GetExecutableFullPath(),
+				std::vector<std::string>{ "sleep2" }
+			};
 
-		THEN( "When executed" )
-		{				
-			REQUIRE( proc.Execute() );
-			REQUIRE( 0 == proc.GetErrorCode() );
-			REQUIRE_FALSE( proc.WaitForTermination( 500ms ) );
-			REQUIRE( proc.IsStillActive() );
-			int exitCode;
-			REQUIRE( proc.WaitForTermination( 2s ) );
-			REQUIRE( proc.GetExitCode( exitCode ) );
-			REQUIRE( exitCode == 2 );
+			THEN( "When executed" )
+			{
+				REQUIRE( proc.Execute() );
+				REQUIRE( 0 == proc.GetErrorCode() );
+				REQUIRE_FALSE( proc.WaitForTermination( 500ms ) );
+				REQUIRE( proc.IsStillActive() );
+				int exitCode;
+				REQUIRE( proc.WaitForTermination( 2s ) );
+				REQUIRE( proc.GetExitCode( exitCode ) );
+				REQUIRE( exitCode == 2 );
+			}
 		}
 	}
 }
@@ -38,17 +42,20 @@ SCENARIO( "File to execute doesn't exist" )
 {
 	GIVEN( "A process object" )
 	{
-		Process proc{ "FileDoesNotExist" };
-
-		THEN( "When executed" )
+		WHEN( "Setup with bad command file name " )
 		{
-			REQUIRE_FALSE( proc.Execute() );
-			REQUIRE( proc.GetErrorCode() == ERROR_FILE_NOT_FOUND );
-		}		
+			Process proc{ "FileDoesNotExist" };
+
+			THEN( "When executed, error is file not found" )
+			{
+				REQUIRE_FALSE( proc.Execute() );
+				REQUIRE( proc.GetErrorCode() == ERROR_FILE_NOT_FOUND );
+			}
+		}
 	}
 }
-*/
-SCENARIO( "Installing and deleting service" )
+
+SCENARIO( "Installing and uninstalling service" )
 {
 	GIVEN( "An application object" )
 	{
@@ -58,19 +65,11 @@ SCENARIO( "Installing and deleting service" )
 		{
 			THEN( "Service is installed" )
 			{
-				REQUIRE( app.InstallService(
-					SERVICE_DEMAND_START,
-					"TestService",
-					"TestServiceDisplayName",
-					std::vector<std::string>{ "LanmanServer", "TapiSrv"},
-					"NT AUTHORITY\\LocalService",
-					"",
-					std::vector<std::string>{} ) 
-				);				
+				REQUIRE( app.InstallService() );
 			}
-			AND_THEN("Service is uninstalled")
+			AND_THEN( "Service is uninstalled" )
 			{
-				REQUIRE( app.UninstallService( "TestService", 3s ) );
+				REQUIRE( app.UninstallService() );
 			}
 		}
 	}

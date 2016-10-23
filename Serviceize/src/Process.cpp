@@ -4,6 +4,8 @@
 
 #include <Serviceize/Process.h>
 
+namespace serviceize {
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 //
@@ -34,11 +36,13 @@ Process::Process( const std::string& commandFile, std::vector<std::string>& argu
 ///////////////////////////////////////////////////////////////////////////////
 Process::~Process()
 {
-	if( myProc.hProcess != nullptr ) {
+	if( myProc.hProcess != nullptr )
+	{
 		CloseHandle( myProc.hProcess );
 	}
 
-	if( myProc.hThread != nullptr ) {
+	if( myProc.hThread != nullptr )
+	{
 		CloseHandle( myProc.hThread );
 	}
 }
@@ -52,7 +56,8 @@ bool Process::Execute()
 {
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/ms682425(v=vs.85).aspx
 	std::string args = myCommandFile;
-	for( auto& a : myArguments ) {
+	for( auto& a : myArguments )
+	{
 		args += " " + Quote( a );
 	}
 
@@ -72,7 +77,8 @@ bool Process::Execute()
 		&myStart,       // Pointer to STARTUPINFO structure
 		&myProc );		// Pointer to PROCESS_INFORMATION structure
 
-	if( res == 0 ) {
+	if( res == 0 )
+	{
 		myLastError = GetLastError();
 	}
 
@@ -87,22 +93,27 @@ bool Process::Execute()
 bool Process::WaitForTermination( std::chrono::milliseconds milliSeconds )
 {
 	auto waitRes = WaitForSingleObject( myProc.hProcess, static_cast<DWORD>(milliSeconds.count()) );
-	
+
 	bool result = false;
 
-	if( waitRes == WAIT_ABANDONED ) {
+	if( waitRes == WAIT_ABANDONED )
+	{
 		result = true;
 	}
-	else if( waitRes == WAIT_TIMEOUT ) {
+	else if( waitRes == WAIT_TIMEOUT )
+	{
 		// Timeout, wait failed
 	}
-	else if( waitRes == WAIT_FAILED ) {
+	else if( waitRes == WAIT_FAILED )
+	{
 		myLastError = GetLastError();
-		if( myLastError == 0 ) {
+		if( myLastError == 0 )
+		{
 			result = true;
 		}
 	}
-	else if( waitRes == WAIT_OBJECT_0 ) {
+	else if( waitRes == WAIT_OBJECT_0 )
+	{
 		result = true;
 	}
 
@@ -128,11 +139,13 @@ bool Process::GetExitCode( int& exitCode )
 {
 	DWORD code;
 	auto res = GetExitCodeProcess( myProc.hProcess, &code );
-	if( res ) {
+	if( res )
+	{
 		exitCode = static_cast<int>(code);
 	}
 
-	if( !res ) {
+	if( !res )
+	{
 		myLastError = GetLastError();
 	}
 
@@ -150,10 +163,11 @@ bool Process::IsStillActive()
 
 
 	int exitCode;
-	if( GetExitCode( exitCode ) ) {
+	if( GetExitCode( exitCode ) )
+	{
 		res = exitCode == STILL_ACTIVE;
 	}
-	
+
 	return res;
 }
 
@@ -167,4 +181,6 @@ std::string Process::GetExecutableFullPath()
 	TCHAR path[MAX_PATH];
 	GetModuleFileName( NULL, path, MAX_PATH );
 	return Process::FromWinAPI( path );
+}
+
 }
