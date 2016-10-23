@@ -6,7 +6,7 @@ class TestApp :
 	public serviceize::Application
 {
 public:
-	explicit TestApp( const std::string& workingDirectory );
+	TestApp();
 	~TestApp();
 	int Main() override;
 

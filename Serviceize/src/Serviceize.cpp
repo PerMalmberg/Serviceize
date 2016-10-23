@@ -22,6 +22,13 @@ namespace serviceize {
 const std::string Serviceize::USER_LOCAL_SERVICE = "NT AUTHORITY\\LocalService";
 const std::string Serviceize::USER_LOCAL_SYSTEM = "NT AUTHORITY\\LocalSystem";
 
+std::function<void( SC_HANDLE )> myServiceCloser = []( SC_HANDLE o ) {
+	if( o != nullptr )
+	{
+		CloseServiceHandle( o );
+	}
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 //
@@ -42,7 +49,7 @@ Serviceize::~Serviceize()
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-bool Serviceize::InstallService(
+bool Serviceize::Install(
 	ServiceStart startType,
 	const std::string& serviceName,
 	const std::string& displayName,
@@ -121,14 +128,14 @@ bool Serviceize::InstallService(
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-bool Serviceize::UninstallService( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const
+bool Serviceize::Uninstall( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const
 {
 	bool result = false;
 
 	AutoCloser<SC_HANDLE> manager( OpenSCManager( NULL, NULL, SC_MANAGER_CONNECT ), myServiceCloser );
 	if( manager.Get() != nullptr )
 	{
-		if( StopService( serviceName, maxWaitTime ) )
+		if( Stop( serviceName, maxWaitTime ) )
 		{
 			auto name = Process::ToWinAPI( serviceName );
 			AutoCloser<SC_HANDLE> sc( OpenService( manager.Get(), name.get(), SERVICE_QUERY_STATUS | DELETE ), myServiceCloser );
@@ -152,7 +159,7 @@ bool Serviceize::UninstallService( const std::string& serviceName, std::chrono::
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-bool Serviceize::StopService( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const
+bool Serviceize::Stop( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const
 {
 	bool result = false;
 
@@ -191,6 +198,49 @@ bool Serviceize::StopService( const std::string& serviceName, std::chrono::secon
 				}
 
 				result = status.dwCurrentState == SERVICE_STOPPED;
+			}
+
+		}
+	}
+
+	return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//
+///////////////////////////////////////////////////////////////////////////////
+bool Serviceize::Start( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const
+{
+	bool result = false;
+
+	AutoCloser<SC_HANDLE> manager( OpenSCManager( NULL, NULL, SC_MANAGER_CONNECT ), myServiceCloser );
+	if( manager.Get() != nullptr )
+	{
+
+		auto name = Process::ToWinAPI( serviceName );
+
+		AutoCloser<SC_HANDLE> sc( OpenService( manager.Get(), name.get(), SERVICE_START | SERVICE_QUERY_STATUS ), myServiceCloser );
+
+		if( sc.Get() != nullptr )
+		{
+
+			SERVICE_STATUS status{};
+			std::chrono::duration<uint64_t> maxWaitTime( 3s );
+			auto start = std::chrono::steady_clock::now();
+
+			// Is the service already running?
+			if( QueryServiceStatus( sc.Get(), &status )
+				&& (status.dwCurrentState == SERVICE_START_PENDING || status.dwCurrentState == SERVICE_RUNNING) )
+			{
+				// Already running, or starting.
+				result = true;
+			}
+			else				
+			{
+				// TODO: Allow passing arguments to the service start routine
+				auto res = ::StartService( sc.Get(), 0, nullptr );
+				result = res != 0;
 			}
 
 		}

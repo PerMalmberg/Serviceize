@@ -59,7 +59,7 @@ SCENARIO( "Installing and uninstalling service" )
 {
 	GIVEN( "An application object" )
 	{
-		TestApp app( "." );
+		TestApp app;
 
 		WHEN( "Installing service" )
 		{

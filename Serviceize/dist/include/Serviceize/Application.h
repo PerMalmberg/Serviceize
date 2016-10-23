@@ -12,7 +12,7 @@ namespace serviceize {
 class Application
 {
 public:
-	explicit Application( const std::string& workingDirectory );
+	explicit Application();
 	virtual ~Application();
 
 	int Run();
@@ -22,7 +22,6 @@ public:
 protected:
 	// Method called once the application is initialized, possible as a service.
 	virtual int Main() = 0;
-	const std::string myWorkingDirectory;
 
 
 	bool IsService() const

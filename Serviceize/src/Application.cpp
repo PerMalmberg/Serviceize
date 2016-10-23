@@ -7,8 +7,7 @@ namespace serviceize {
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-Application::Application( const std::string& workingDirectory )
-	:myWorkingDirectory( workingDirectory )
+Application::Application()
 {
 }
 

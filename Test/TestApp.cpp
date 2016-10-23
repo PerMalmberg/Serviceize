@@ -3,8 +3,8 @@
 using namespace std::chrono_literals;
 using namespace serviceize;
 
-TestApp::TestApp( const std::string& workingDirectory )
-	: Application( myWorkingDirectory )
+TestApp::TestApp()
+	: Application()
 {
 }
 
@@ -21,7 +21,7 @@ int TestApp::Main()
 bool TestApp::InstallService()
 {
 	// Install ourselves as a service
-	return myServiceizer.InstallService(
+	return myServiceizer.Install(
 		Serviceize::DEMAND_START,
 		"TestService",
 		"TestServiceDisplayName",
@@ -34,5 +34,5 @@ bool TestApp::InstallService()
 bool TestApp::UninstallService()
 {
 	// Install ourselves as a service
-	return myServiceizer.UninstallService( "TestService", 3s );
+	return myServiceizer.Uninstall( "TestService", 3s );
 }

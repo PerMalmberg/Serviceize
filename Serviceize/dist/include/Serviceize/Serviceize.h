@@ -6,7 +6,6 @@
 
 #include <string>
 #include <vector>
-#include <windows.h>
 #include <functional>
 #include <chrono>
 
@@ -19,17 +18,20 @@ public:
 	virtual ~Serviceize();
 
 	enum ServiceStart {
-		AUTO_START = SERVICE_AUTO_START,
-		BOOT_START = SERVICE_BOOT_START,
-		DEMAND_START = SERVICE_DEMAND_START, // Manual
-		DISABLED = SERVICE_DISABLED,
-		SYSTEM_START = SERVICE_SYSTEM_START
+		// These values are from winnt.h, but we don't want to include winnt.h 
+		// or windows.h in our header files if we can avoid it since it badly 
+		// polutes the global namepace.
+		BOOT_START = 0x0,
+		SYSTEM_START = 0x1,
+		AUTO_START = 0x2,
+		DEMAND_START = 0x3, // Manual
+		DISABLED = 0x4
 	};
 
 	static const std::string USER_LOCAL_SERVICE;
 	static const std::string USER_LOCAL_SYSTEM;
 
-	bool InstallService(
+	bool Install(
 		ServiceStart startType,
 		const std::string& serviceName,
 		const std::string& displayName,
@@ -38,15 +40,11 @@ public:
 		const std::string& password,
 		const std::vector<std::string>& arguments ) const;
 
-	bool UninstallService( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const;
-	bool StopService( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const;
+	bool Uninstall( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const;
+	bool Stop( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const;
+	bool Start( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const;
 private:
-	std::function<void( SC_HANDLE )> myServiceCloser = []( SC_HANDLE o ) {
-		if( o != nullptr )
-		{
-			CloseServiceHandle( o );
-		}
-	};
+	
 };
 
 }
