@@ -15,7 +15,7 @@ Application* Application::myInstance = nullptr;
 ///////////////////////////////////////////////////////////////////////////////
 Application::Application( const std::string& serviceName, bool canStop, bool canShutdown, bool canPause )
 	:myName( Process::ToWinAPI( serviceName ) )
-{	
+{
 	myStatusHandle = nullptr;
 
 	// The service runs in its own process. 
@@ -67,6 +67,50 @@ bool Application::RunService( Application& app )
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
+int Application::RunConsole( Application& app, int argc, const char* argv[] )
+{
+	myInstance = &app;
+	myInstance->myIsService = false;
+	SetConsoleCtrlHandler( ConsoleSignalRoutine, TRUE );
+
+#ifdef UNICODE
+	// Create an array with the converted buffers
+	int charCount = 0;
+	for( int i = 0; i < argc; ++i )
+	{
+		auto s = Process::ToWinAPI( argv[i] );
+		charCount += lstrlen( s.get() ) + 1; // One extra for null-char
+	}
+
+	// Allocate a buffer large enough to hold the wide-char data, including null-characters
+	int bytesNeeded = charCount * sizeof( wchar_t );
+	auto wideBuffer = std::make_unique<wchar_t[]>( bytesNeeded );
+
+	// Create a pointer array to act as the argv to be passed on.
+	auto wideArgv = std::make_unique<wchar_t*[]>( argc );
+
+	int offset = 0;
+	for( int i = 0; i < argc; ++i )
+	{
+		auto s = Process::ToWinAPI( argv[i] );
+		int charCount = lstrlen( s.get() ) + 1; // Add one for null-char
+		StringCchCopy( wideBuffer.get() + offset, bytesNeeded - offset, s.get() );
+		//wideArgv.get()[i] = wideBuffer.get() + offset;
+		wideArgv[i] = wideBuffer.get() + offset;
+		offset += charCount;
+	}
+
+	myInstance->Start( argc, wideArgv.get() );
+#else
+	myInstance->Start( argc, const_cast<char**>( argv ) );
+#endif
+	return myInstance->RunAsConsole();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//
+///////////////////////////////////////////////////////////////////////////////
 #ifdef UNICODE
 void WINAPI Application::ServiceMain( DWORD argc, PWSTR *argv )
 #else
@@ -88,10 +132,10 @@ void WINAPI Application::ServiceMain( DWORD argc, PSTR *argv )
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-//
-///////////////////////////////////////////////////////////////////////////////
 // The function is called by the SCM whenever a control code is sent to  
 // the service. 
+//
+///////////////////////////////////////////////////////////////////////////////
 void WINAPI Application::ServiceCtrlHandler( DWORD ctrl )
 {
 	// SERVICE_CONTROL_CONTINUE
@@ -123,8 +167,38 @@ void WINAPI Application::ServiceCtrlHandler( DWORD ctrl )
 	}
 	else if( ctrl >= 128 && ctrl <= 255 )
 	{
-		myInstance->ControlCode( ctrl );
+		myInstance->OnControlCode( ctrl );
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+//
+//
+///////////////////////////////////////////////////////////////////////////////
+BOOL WINAPI Application::ConsoleSignalRoutine( DWORD control )
+{
+	BOOL res = TRUE;
+
+	if( control == CTRL_C_EVENT )
+	{
+		myInstance->Stop();
+	}
+	else if( control == CTRL_BREAK_EVENT )
+	{
+		myInstance->Stop();
+	}
+	else if( control == CTRL_CLOSE_EVENT )
+	{
+		myInstance->Shutdown();
+	}
+	else
+	{
+		// Signaled not handled.
+		res = FALSE;
+	}
+
+	return res;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -155,36 +229,45 @@ void Application::SetStatus( DWORD currentState, DWORD exitCode, DWORD waitHint 
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef UNICODE
-void Application::Start( DWORD argc, PWSTR *argv )
+void Application::Start( DWORD argc, PWSTR* argv )
 #else
-void Application::Start( DWORD argc, PSTR *argv )
+void Application::Start( DWORD argc, const PSTR* argv )
 #endif
 {
-	try
+	std::vector<std::string> arguments;
+	for( DWORD i = 0; i < argc; ++i )
 	{
-		// Tell SCM that the service is starting. 
-		SetStatus( SERVICE_START_PENDING );
+		arguments.push_back( Process::FromWinAPI( argv[i] ) );
+	}
 
-		std::vector<std::string> arguments;
-		for( DWORD i = 0; i < argc; ++i )
+	if( IsService() )
+	{
+		try
 		{
-			arguments.push_back( Process::FromWinAPI( argv[i] ) );
+			// Tell SCM that the service is starting. 
+			SetStatus( SERVICE_START_PENDING );			
+
+			// Perform service-specific initialization. 
+			OnStart( arguments );
+
+			RunAsService();
+
+			// Tell SCM that the service is started. 
+			SetStatus( SERVICE_RUNNING );
 		}
-
-		// Perform service-specific initialization. 
+		catch( DWORD error )
+		{
+			SetStatus( SERVICE_STOPPED, error );
+		}
+		catch( ... )
+		{
+			// Set the service status to be stopped. 
+			SetStatus( SERVICE_STOPPED );
+		}
+	}
+	else
+	{
 		OnStart( arguments );
-
-		// Tell SCM that the service is started. 
-		SetStatus( SERVICE_RUNNING );
-	}
-	catch( DWORD error )
-	{
-		SetStatus( SERVICE_STOPPED, error );
-	}
-	catch( ... )
-	{
-		// Set the service status to be stopped. 
-		SetStatus( SERVICE_STOPPED );
 	}
 }
 
@@ -195,25 +278,32 @@ void Application::Start( DWORD argc, PSTR *argv )
 ///////////////////////////////////////////////////////////////////////////////
 void Application::Stop()
 {
-	auto originalState = myStatus.dwCurrentState;
-	try
+	if( IsService() )
 	{
-		// Tell SCM that the service is stopping. 
-		SetStatus( SERVICE_STOP_PENDING );
+		auto originalState = myStatus.dwCurrentState;
+		try
+		{
+			// Tell SCM that the service is stopping. 
+			SetStatus( SERVICE_STOP_PENDING );
 
-		// Perform service-specific stop operations. 
+			// Perform service-specific stop operations. 
+			OnStop();
+
+			// Tell SCM that the service is stopped. 
+			SetStatus( SERVICE_STOPPED );
+		}
+		catch( DWORD )
+		{
+			SetStatus( originalState );
+		}
+		catch( ... )
+		{
+			SetStatus( originalState );
+		}
+	}
+	else
+	{
 		OnStop();
-
-		// Tell SCM that the service is stopped. 
-		SetStatus( SERVICE_STOPPED );
-	}
-	catch( DWORD )
-	{
-		SetStatus( originalState );
-	}
-	catch( ... )
-	{
-		SetStatus( originalState );
 	}
 }
 
@@ -280,51 +370,39 @@ void Application::Continue()
 ///////////////////////////////////////////////////////////////////////////////
 void Application::Shutdown()
 {
-	try
+	if( IsService() )
 	{
-		// Perform service-specific shutdown operations. 
+		try
+		{
+			// Perform service-specific shutdown operations. 
+			OnShutdown();
+
+			// Tell SCM that the service is stopped. 
+			SetStatus( SERVICE_STOPPED );
+		}
+		catch( DWORD )
+		{
+
+		}
+		catch( ... )
+		{
+
+		}
+	}
+	else
+	{
 		OnShutdown();
-
-		// Tell SCM that the service is stopped. 
-		SetStatus( SERVICE_STOPPED );
-	}
-	catch( DWORD )
-	{
-
-	}
-	catch( ... )
-	{
-
 	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// User-defined code recevied
+// User-defined code recevied when running a service
 //
 ///////////////////////////////////////////////////////////////////////////////
-void Application::ControlCode( int code )
+void Application::OnControlCode( int code )
 {
-	
 }
 
-/*
-///////////////////////////////////////////////////////////////////////////////
-//
-//
-///////////////////////////////////////////////////////////////////////////////
-int Application::Run()
-{
-	return 0;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//
-//
-///////////////////////////////////////////////////////////////////////////////
-int Application::RunAsService()
-{
-	return 0;
-}*/
 
 }

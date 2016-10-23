@@ -83,3 +83,24 @@ SCENARIO( "Installing and uninstalling service" )
 	}
 }
 
+
+SCENARIO( "Run as console" )
+{
+	GIVEN( "An application object" )
+	{
+		TestApp app;
+
+		WHEN( "Run as console" )
+		{
+			THEN( "Service is installed" )
+			{
+				const int argc = 2;
+				const char* argv[] = {
+					"Foo", "Bar"
+				};
+
+				REQUIRE( TestApp::RunConsole( app, argc, argv ) == 5 );
+			}			
+		}
+	}
+}

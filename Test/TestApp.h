@@ -14,5 +14,13 @@ public:
 	bool UninstallService();
 	bool Start();
 	bool Stop();
+
+	void RunAsService() override;
+
+	int RunAsConsole() override;
+
+	void OnStart( std::vector<std::string>& arguments ) override;
+private:
+	int myReturnValue = 666;
 };
 

@@ -47,11 +47,16 @@ int main( int argc, const char* argv[] )
 			result = app.Stop() ? 0 : 1;
 			std::cout << "Stop: " << result << std::endl;
 		}
-		else if( strcmp( argv[1], "--runservice" ) )
+		else if( strcmp( argv[1], "--runservice" ) == 0 )
 		{
 			// Run as a service
 			TestApp app;
 			result = TestApp::RunService( app ) ? 0 : 1;
+		}
+		else if( strcmp( argv[1], "--commandline" ) == 0 )
+		{
+			TestApp app;
+			result = TestApp::RunConsole( app, argc, argv );
 		}
 	}
 	else

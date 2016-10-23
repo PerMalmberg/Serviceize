@@ -6,11 +6,11 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 include_directories( dist/include )
 
 set(SOURCE_FILES
-        dist/include/Serviceize/Serviceize.h
+        dist/include/Serviceize/ServiceController.h
 		dist/include/Serviceize/Application.h
 		dist/include/Serviceize/Process.h
 		dist/include/Serviceize/AutoCloser.h
-        src/Serviceize.cpp
+        src/ServiceController.cpp
         src/Application.cpp
 		src/Process.cpp
 		

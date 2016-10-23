@@ -23,11 +23,12 @@ public:
 	virtual ~Application();
 
 	static bool RunService( Application& app );
+	static int Application::RunConsole( Application& app, int argc, const char* argv[] );
 
 protected:
 	// Method called once the application is initialized, possible as a service.
 	virtual int Main() = 0;
-
+	bool IsService() const { return myIsService; }
 
 #ifdef UNICODE
 	wchar_t* GetName() const { return myName.get(); }
@@ -64,31 +65,45 @@ protected:
 	// system shutting down. 
 	virtual void OnShutdown() {}
 
+	// User-defined code recevied
+	virtual void OnControlCode( int code );
+
+	// Method called when the application is run as a service.
+	// Do not block - user a worker thread or similar mechanism
+	// to perform long-running work.
+	virtual void RunAsService() = 0;
+
+	// Method called when the application is run from the console.
+	// May block until application shall terminate.
+	virtual int RunAsConsole() = 0;
+
 private:
 #ifdef UNICODE
 	std::unique_ptr<wchar_t[]> myName;
-	static void WINAPI ServiceMain( DWORD argc, PWSTR *argv );
+	static void WINAPI ServiceMain( DWORD argc, PWSTR* argv );
 	// Start the service. 
 	void Start( DWORD argc, PWSTR *argv );
 #else
 	std::unique_ptr<char[]> myName;
-	static void WINAPI ServiceMain( DWORD argc, PSTR *argv );
+	static void WINAPI ServiceMain( DWORD argc, PSTR* argv );
 	// Start the service. 
-	void Start( DWORD argc, PSTR *argv );
+	void Start( DWORD argc, const PSTR* argv);
 #endif // UNICODE
 
-	// The function is called by the SCM whenever a control code is sent to  
-	// the service. 
-	static void WINAPI ServiceCtrlHandler( DWORD dwCtrl );
+	// This function is called by the SCM whenever a control code is sent to the service. 
+	static void WINAPI ServiceCtrlHandler( DWORD ctrl );
+
+	// This function is called whenever a control code received from the command prompt
+	static BOOL WINAPI ConsoleSignalRoutine( DWORD control );
 
 	void SetStatus( DWORD currentState,	DWORD exitCode = NO_ERROR, DWORD waitHint = 0 );
 
 	static Application* myInstance;
 	SERVICE_STATUS_HANDLE myStatusHandle;
 	SERVICE_STATUS myStatus;
-	
+	bool myIsService = true;	
 
-
+	// Stop the service
 	void Stop();
 
 	// Pause the service. 
@@ -99,9 +114,6 @@ private:
 
 	// Execute when the system is shutting down. 
 	void Shutdown();
-
-	// User-defined code recevied
-	void ControlCode( int code );
 };
 
 }

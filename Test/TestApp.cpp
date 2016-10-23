@@ -28,7 +28,7 @@ bool TestApp::InstallService()
 		std::vector<std::string>{},
 		ServiceController::USER_LOCAL_SERVICE,
 		"",
-		std::vector<std::string>{ "-runservice" } );
+		std::vector<std::string>{ "--runservice" } );
 }
 
 bool TestApp::UninstallService()
@@ -45,4 +45,25 @@ bool TestApp::Start()
 bool TestApp::Stop()
 {
 	return myServiceizer.Stop( "TestService", 3s );
+}
+
+void TestApp::OnStart( std::vector<std::string>& arguments )
+{
+	if( arguments.size() == 2 )
+	{
+		if( arguments[0] == "Foo" )
+		{
+			myReturnValue = 5;
+		}
+	}
+}
+
+void TestApp::RunAsService()
+{
+
+}
+
+int TestApp::RunAsConsole()
+{
+	return myReturnValue;
 }
