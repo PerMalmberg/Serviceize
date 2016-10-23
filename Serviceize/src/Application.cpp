@@ -3,7 +3,7 @@
 #include <strsafe.h>
 #include <sstream>
 #include "Serviceize/Application.h"
-#include "Serviceize\Process.h"
+#include "Serviceize/Process.h"
 
 namespace serviceize {
 

@@ -41,6 +41,12 @@ int main( int argc, const char* argv[] )
 			result = app.Start() ? 0 : 1;
 			std::cout << "Start: " << result << std::endl;
 		}
+		else if( strcmp( argv[1], "stop" ) == 0 )
+		{
+			TestApp app;
+			result = app.Stop() ? 0 : 1;
+			std::cout << "Stop: " << result << std::endl;
+		}
 		else if( strcmp( argv[1], "--runservice" ) )
 		{
 			// Run as a service
