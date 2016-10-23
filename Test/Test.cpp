@@ -80,13 +80,13 @@ SCENARIO( "Stopping service" )
 {
 	GIVEN( "An application object" )
 	{
-		TestApp app( "." );
+		TestApp app;
 
 		WHEN( "Stopping service" )
 		{
 			THEN( "Service is stopped" )
 			{
-				REQUIRE( app.StopService( "TeamViewer", 3s ) );
+				REQUIRE( app.Stop( "TeamViewer", 3s ) );
 			}
 		}
 	}

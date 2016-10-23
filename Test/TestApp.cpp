@@ -4,7 +4,7 @@ using namespace std::chrono_literals;
 using namespace serviceize;
 
 TestApp::TestApp()
-	: Application()
+	: Application( "TestService" )
 {
 }
 
@@ -28,11 +28,11 @@ bool TestApp::InstallService()
 		std::vector<std::string>{},
 		Serviceize::USER_LOCAL_SERVICE,
 		"",
-		std::vector<std::string>{} );
+		std::vector<std::string>{ "-runservice" } );
 }
 
 bool TestApp::UninstallService()
 {
-	// Install ourselves as a service
+	// Uninstall ourselves
 	return myServiceizer.Uninstall( "TestService", 3s );
 }

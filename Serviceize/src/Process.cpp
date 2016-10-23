@@ -214,12 +214,12 @@ std::unique_ptr<wchar_t[]> Process::ToWinAPI( const std::string& s )
 	return wBuff;
 }
 #else
-static std::string  Process::FromWinAPI( const char* s )
+std::string  Process::FromWinAPI( const char* s )
 {
 	return std::string( s );
 }
 
-static std::unique_ptr<char[]>  Process::ToWinAPI( const std::string& s )
+std::unique_ptr<char[]>  Process::ToWinAPI( const std::string& s )
 {
 	auto buff = std::make_unique<char[]>( s.length() + 1 );
 	ZeroMemory( buff.get(), s.length() + 1 );

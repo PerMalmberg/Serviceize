@@ -70,7 +70,6 @@ bool Serviceize::Install(
 	{
 		auto service = Process::ToWinAPI( serviceName );
 		auto display = Process::ToWinAPI( displayName );
-		auto path = Process::ToWinAPI( Process::GetExecutableFullPath() );
 		auto acc = Process::ToWinAPI( account );
 		auto pwd = Process::ToWinAPI( password );
 
@@ -98,6 +97,21 @@ bool Serviceize::Install(
 			StringCchCopy( deps.get() + offset, bytesNeeded - offset, curr.get() );
 			offset += len + 1; // One for null-char
 		}
+
+		// Build argument string
+		std::string arg;
+		for( auto a : arguments )
+		{
+			if( arg.size() > 0 )
+			{
+				arg += " ";
+			}
+
+			arg += Process::Quote( a );
+		}
+
+		auto pathAndArg = Process::GetExecutableFullPath() + " " + arg;
+		auto path = Process::ToWinAPI( pathAndArg );
 
 		AutoCloser<SC_HANDLE> sc(
 			CreateService(

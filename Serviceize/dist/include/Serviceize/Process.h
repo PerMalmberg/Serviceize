@@ -39,9 +39,9 @@ public:
 	static std::string FromWinAPI( const char* s );
 	static std::unique_ptr<char[]> ToWinAPI( const std::string& s );
 #endif
-
+	
+	static std::string Quote( const std::string& s );
 protected:
-	std::string Quote( const std::string& s );
 
 private:
 	std::string myCommandFile;
