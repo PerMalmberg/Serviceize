@@ -2,7 +2,7 @@
 A small framework for creating a Windows service with debugging possibilities via alternate call chain as a console application.
 
 #Why
-Like (Daemonize)[https://github.com/PerMalmberg/Daemonize], I wrote this library because I was interested in how a Windows service works. 
+Like [Daemonize](https://github.com/PerMalmberg/Daemonize), I wrote this library because I was interested in how a Windows service works. 
 I also wanted a framework that makes it possible to run an application both as a Windows service and a console application (for debugging purposes) without having
 to write two separate implementations.
 
