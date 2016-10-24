@@ -6,7 +6,8 @@ class TestApp :
 	public serviceize::Application
 {
 public:
-	TestApp();
+	TestApp( bool enableManualTest = false );
+	TestApp( int argc, const char* argv[], bool enableManualTest = false );
 	~TestApp();
 	int Main() override;
 
@@ -20,7 +21,11 @@ public:
 	int RunAsConsole() override;
 
 	void OnStart( std::vector<std::string>& arguments ) override;
+
+	void OnStop() override;
 private:
 	int myReturnValue = 666;
+	bool myTerminateManualTest;
+	std::vector<std::string> myArguments;
 };
 

@@ -42,7 +42,7 @@ public:
 
 	bool Uninstall( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const;
 	bool Stop( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const;
-	bool Start( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const;
+	bool Start( const std::string& serviceName ) const;
 private:
 	
 };

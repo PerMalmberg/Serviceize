@@ -50,13 +50,13 @@ int main( int argc, const char* argv[] )
 		else if( strcmp( argv[1], "--runservice" ) == 0 )
 		{
 			// Run as a service
-			TestApp app;
+			TestApp app( argc, argv );
 			result = TestApp::RunService( app ) ? 0 : 1;
 		}
 		else if( strcmp( argv[1], "--commandline" ) == 0 )
 		{
-			TestApp app;
-			result = TestApp::RunConsole( app, argc, argv );
+			TestApp app( argc, argv );
+			result = TestApp::RunConsole( app );
 		}
 	}
 	else

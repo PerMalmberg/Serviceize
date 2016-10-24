@@ -88,18 +88,20 @@ SCENARIO( "Run as console" )
 {
 	GIVEN( "An application object" )
 	{
-		TestApp app;
+		const int argc = 2;
+		const char* argv[argc] = {
+			"Foo", "Bar"
+		};
+
+		TestApp app( argc, argv );
 
 		WHEN( "Run as console" )
 		{
 			THEN( "Service is installed" )
 			{
-				const int argc = 2;
-				const char* argv[] = {
-					"Foo", "Bar"
-				};
+				
 
-				REQUIRE( TestApp::RunConsole( app, argc, argv ) == 5 );
+				REQUIRE( TestApp::RunConsole( app ) == 5 );
 			}			
 		}
 	}

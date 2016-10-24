@@ -189,7 +189,6 @@ bool ServiceController::Stop( const std::string& serviceName, std::chrono::secon
 		{
 
 			SERVICE_STATUS status{};
-			std::chrono::duration<uint64_t> maxWaitTime( 3s );
 			auto start = std::chrono::steady_clock::now();
 
 			// Is the service actually running?
@@ -224,7 +223,7 @@ bool ServiceController::Stop( const std::string& serviceName, std::chrono::secon
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-bool ServiceController::Start( const std::string& serviceName, std::chrono::seconds maxWaitTime ) const
+bool ServiceController::Start( const std::string& serviceName ) const
 {
 	bool result = false;
 
@@ -240,8 +239,6 @@ bool ServiceController::Start( const std::string& serviceName, std::chrono::seco
 		{
 
 			SERVICE_STATUS status{};
-			std::chrono::duration<uint64_t> maxWaitTime( 3s );
-			auto start = std::chrono::steady_clock::now();
 
 			// Is the service already running?
 			if( QueryServiceStatus( sc.Get(), &status )
@@ -252,7 +249,6 @@ bool ServiceController::Start( const std::string& serviceName, std::chrono::seco
 			}
 			else				
 			{
-				// TODO: Allow passing arguments to the service start routine
 				auto res = ::StartService( sc.Get(), 0, nullptr );
 				result = res != 0;
 			}

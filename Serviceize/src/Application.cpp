@@ -13,8 +13,8 @@ Application* Application::myInstance = nullptr;
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-Application::Application( const std::string& serviceName, bool canStop, bool canShutdown, bool canPause )
-	:myName( Process::ToWinAPI( serviceName ) )
+Application::Application( const std::string& serviceName, int argc, const char* argv[], bool canStop, bool canShutdown, bool canPause )
+	:myName( Process::ToWinAPI( serviceName ) ), myArguments()
 {
 	myStatusHandle = nullptr;
 
@@ -32,6 +32,12 @@ Application::Application( const std::string& serviceName, bool canStop, bool can
 	myStatus.dwServiceSpecificExitCode = 0;
 	myStatus.dwCheckPoint = 0;
 	myStatus.dwWaitHint = 0;
+
+	// Store our arguments
+	for( int i = 0; i < argc; ++i )
+	{
+		myArguments.push_back( argv[i] );
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -67,43 +73,13 @@ bool Application::RunService( Application& app )
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-int Application::RunConsole( Application& app, int argc, const char* argv[] )
+int Application::RunConsole( Application& app )
 {
+	
 	myInstance = &app;
 	myInstance->myIsService = false;
-	SetConsoleCtrlHandler( ConsoleSignalRoutine, TRUE );
-
-#ifdef UNICODE
-	// Create an array with the converted buffers
-	int charCount = 0;
-	for( int i = 0; i < argc; ++i )
-	{
-		auto s = Process::ToWinAPI( argv[i] );
-		charCount += lstrlen( s.get() ) + 1; // One extra for null-char
-	}
-
-	// Allocate a buffer large enough to hold the wide-char data, including null-characters
-	int bytesNeeded = charCount * sizeof( wchar_t );
-	auto wideBuffer = std::make_unique<wchar_t[]>( bytesNeeded );
-
-	// Create a pointer array to act as the argv to be passed on.
-	auto wideArgv = std::make_unique<wchar_t*[]>( argc );
-
-	int offset = 0;
-	for( int i = 0; i < argc; ++i )
-	{
-		auto s = Process::ToWinAPI( argv[i] );
-		int charCount = lstrlen( s.get() ) + 1; // Add one for null-char
-		StringCchCopy( wideBuffer.get() + offset, bytesNeeded - offset, s.get() );
-		//wideArgv.get()[i] = wideBuffer.get() + offset;
-		wideArgv[i] = wideBuffer.get() + offset;
-		offset += charCount;
-	}
-
-	myInstance->Start( argc, wideArgv.get() );
-#else
-	myInstance->Start( argc, const_cast<char**>( argv ) );
-#endif
+	
+	myInstance->Start();
 	return myInstance->RunAsConsole();
 }
 
@@ -112,9 +88,9 @@ int Application::RunConsole( Application& app, int argc, const char* argv[] )
 //
 ///////////////////////////////////////////////////////////////////////////////
 #ifdef UNICODE
-void WINAPI Application::ServiceMain( DWORD argc, PWSTR *argv )
+void WINAPI Application::ServiceMain( DWORD, PWSTR * )
 #else
-void WINAPI Application::ServiceMain( DWORD argc, PSTR *argv )
+void WINAPI Application::ServiceMain( DWORD, PSTR * )
 #endif
 {
 	// Register the handler function for the service 
@@ -127,7 +103,7 @@ void WINAPI Application::ServiceMain( DWORD argc, PSTR *argv )
 	}
 
 	// Start the service.
-	myInstance->Start( argc, argv );
+	myInstance->Start();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -228,18 +204,8 @@ void Application::SetStatus( DWORD currentState, DWORD exitCode, DWORD waitHint 
 // Start the service. 
 //
 ///////////////////////////////////////////////////////////////////////////////
-#ifdef UNICODE
-void Application::Start( DWORD argc, PWSTR* argv )
-#else
-void Application::Start( DWORD argc, const PSTR* argv )
-#endif
+void Application::Start()
 {
-	std::vector<std::string> arguments;
-	for( DWORD i = 0; i < argc; ++i )
-	{
-		arguments.push_back( Process::FromWinAPI( argv[i] ) );
-	}
-
 	if( IsService() )
 	{
 		try
@@ -248,7 +214,7 @@ void Application::Start( DWORD argc, const PSTR* argv )
 			SetStatus( SERVICE_START_PENDING );			
 
 			// Perform service-specific initialization. 
-			OnStart( arguments );
+			OnStart( myArguments );
 
 			RunAsService();
 
@@ -267,7 +233,7 @@ void Application::Start( DWORD argc, const PSTR* argv )
 	}
 	else
 	{
-		OnStart( arguments );
+		OnStart( myArguments );
 	}
 }
 
@@ -400,7 +366,7 @@ void Application::Shutdown()
 // User-defined code recevied when running a service
 //
 ///////////////////////////////////////////////////////////////////////////////
-void Application::OnControlCode( int code )
+void Application::OnControlCode( int /*code*/ )
 {
 }
 

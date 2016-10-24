@@ -19,11 +19,11 @@ namespace serviceize {
 class Application
 {
 public:
-	Application( const std::string& serviceName, bool canStop = true, bool canShutdown = true, bool canPause = true );
+	Application( const std::string& serviceName, int argc, const char* argv[], bool canStop = true, bool canShutdown = true, bool canPause = true );
 	virtual ~Application();
 
 	static bool RunService( Application& app );
-	static int Application::RunConsole( Application& app, int argc, const char* argv[] );
+	static int Application::RunConsole( Application& app );
 
 protected:
 	// Method called once the application is initialized, possible as a service.
@@ -43,7 +43,7 @@ protected:
 	// sent to the service by the SCM or when the operating system starts  
 	// (for a service that starts automatically). Specifies actions to take  
 	// when the service starts. 
-	virtual void OnStart( std::vector<std::string>& arguments ) {}
+	virtual void OnStart( std::vector<std::string>& arguments ) { arguments; }
 
 	// When implemented in a derived class, executes when a Stop command is  
 	// sent to the service by the SCM. Specifies actions to take when a  
@@ -69,25 +69,24 @@ protected:
 	virtual void OnControlCode( int code );
 
 	// Method called when the application is run as a service.
-	// Do not block - user a worker thread or similar mechanism
+	// Must not block - use a worker thread or similar mechanism
 	// to perform long-running work.
 	virtual void RunAsService() = 0;
 
 	// Method called when the application is run from the console.
-	// May block until application shall terminate.
+	// Shall block until application shall terminate; i.e. call the same
+	// code as you would normaly run in a separate process from RunAsService().
 	virtual int RunAsConsole() = 0;
 
 private:
+	void Start();
 #ifdef UNICODE
 	std::unique_ptr<wchar_t[]> myName;
 	static void WINAPI ServiceMain( DWORD argc, PWSTR* argv );
 	// Start the service. 
-	void Start( DWORD argc, PWSTR *argv );
 #else
 	std::unique_ptr<char[]> myName;
 	static void WINAPI ServiceMain( DWORD argc, PSTR* argv );
-	// Start the service. 
-	void Start( DWORD argc, const PSTR* argv);
 #endif // UNICODE
 
 	// This function is called by the SCM whenever a control code is sent to the service. 
@@ -102,6 +101,7 @@ private:
 	SERVICE_STATUS_HANDLE myStatusHandle;
 	SERVICE_STATUS myStatus;
 	bool myIsService = true;	
+	std::vector<std::string> myArguments;
 
 	// Stop the service
 	void Stop();

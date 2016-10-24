@@ -1,10 +1,18 @@
 #include "TestApp.h"
+#include <thread>
+#include <fstream>
 
 using namespace std::chrono_literals;
 using namespace serviceize;
 
-TestApp::TestApp()
-	: Application( "TestService" )
+TestApp::TestApp( bool enableManualTest )
+	: TestApp( enableManualTest, 0, nullptr )
+{
+
+}
+
+TestApp::TestApp( int argc, const char* argv[], bool enableManualTest )
+	: Application( "TestService", argc, argv ), myTerminateManualTest( !enableManualTest ), myArguments()
 {
 }
 
@@ -39,7 +47,7 @@ bool TestApp::UninstallService()
 
 bool TestApp::Start()
 {
-	return myServiceizer.Start( "TestService", 3s );
+	return myServiceizer.Start( "TestService" );
 }
 
 bool TestApp::Stop()
@@ -56,14 +64,35 @@ void TestApp::OnStart( std::vector<std::string>& arguments )
 			myReturnValue = 5;
 		}
 	}
+
+	for( auto& a : arguments )
+	{
+		myArguments.push_back( a );
+	}
 }
 
 void TestApp::RunAsService()
 {
+	std::ofstream f( "d:\\temp\\arg.txt", std::ofstream::out | std::ofstream::binary );
+	for( auto& s : myArguments )
+	{
+		f << s << std::endl;
+	}
+	f.close();
 
 }
 
 int TestApp::RunAsConsole()
 {
+	while( !myTerminateManualTest )
+	{
+		std::this_thread::sleep_for( 40ms );
+	}
 	return myReturnValue;
+}
+
+void TestApp::OnStop()
+{
+	// This is for the manual commandline test (run with --commandline and press CTRL-C to test)
+	myTerminateManualTest = true;
 }

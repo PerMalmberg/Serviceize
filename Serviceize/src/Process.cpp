@@ -21,7 +21,7 @@ Process::Process( const std::string& commandFile )
 //
 //
 ///////////////////////////////////////////////////////////////////////////////
-Process::Process( const std::string& commandFile, std::vector<std::string>& arguments )
+Process::Process( const std::string& commandFile, const std::vector<std::string>& arguments )
 	: myCommandFile( commandFile ), myArguments( arguments )
 {
 	ZeroMemory( &myStart, sizeof( myStart ) );
@@ -195,7 +195,7 @@ std::string Process::FromWinAPI( const wchar_t* s )
 	auto bytesNeeded = WideCharToMultiByte( CP_UTF8, 0, s, -1, nullptr, 0, nullptr, nullptr );
 	auto utf8 = std::make_unique<char[]>( bytesNeeded );
 	// Perform conversion
-	auto bytesWritten = WideCharToMultiByte( CP_UTF8, 0, s, -1, utf8.get(), bytesNeeded, nullptr, nullptr );
+	WideCharToMultiByte( CP_UTF8, 0, s, -1, utf8.get(), bytesNeeded, nullptr, nullptr );
 	return std::string( utf8.get() );
 }
 
@@ -210,7 +210,7 @@ std::unique_ptr<wchar_t[]> Process::ToWinAPI( const std::string& s )
 	auto countRequired = MultiByteToWideChar( CP_UTF8, 0, s.c_str(), -1, nullptr, 0 );
 	auto wBuff = std::make_unique<wchar_t[]>( countRequired );
 	// Perform conversion
-	auto countWritten = MultiByteToWideChar( CP_UTF8, 0, s.c_str(), -1, wBuff.get(), countRequired );
+	MultiByteToWideChar( CP_UTF8, 0, s.c_str(), -1, wBuff.get(), countRequired );
 	return wBuff;
 }
 #else

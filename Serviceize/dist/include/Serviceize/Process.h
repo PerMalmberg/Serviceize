@@ -17,7 +17,7 @@ namespace serviceize {
 class Process
 {
 public:
-	Process( const std::string& commandFile, std::vector<std::string>& arguments );
+	Process( const std::string& commandFile, const std::vector<std::string>& arguments );
 	explicit Process( const std::string& commandFile );
 
 	virtual ~Process();
