@@ -10,9 +10,6 @@
 #include <memory>
 #include "Serviceize/ServiceController.h"
 
-// TODO: Signals, Control-C
-// https://msdn.microsoft.com/en-us/library/windows/desktop/ms683242.aspx
-
 namespace serviceize {
 
 
