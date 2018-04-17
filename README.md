@@ -1,12 +1,12 @@
 # Serviceize
 A small framework for creating a Windows service with debugging possibilities via alternate call chain as a console application.
 
-#Why
+# Why
 Like [Daemonize](https://github.com/PerMalmberg/Daemonize), I wrote this library because I was interested in how a Windows service works. 
 I also wanted a framework that makes it possible to run an application both as a Windows service and a console application (for debugging purposes) without having
 to write two separate implementations.
 
-#What
+# What
 Serviceize is a framework consisting of a main class, ```Application``` and a two helpers; ```ServiceController``` and ```Process```. 
 
 Using this framework you get:
@@ -14,7 +14,7 @@ Using this framework you get:
 * Ability to run your application as a console application which makes it easier to debug (no need to attach to process). All you loose is the pause/continue ability a service can do.
 * Signal handling (CTRL-C and CTRL-Break) for console mode.
 
-#How
+# How
 As shown in the tests, you inherit from ```Application``` and implement the methods ```RunAsService()``` and ```RunAsConsole()```, is desired. 
 
 When started from Windows Service Control Manager (SCM), in your ```main()``` you do:
