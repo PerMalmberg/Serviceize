@@ -9,7 +9,6 @@ public:
 	TestApp( bool enableManualTest = false );
 	TestApp( int argc, const char* argv[], bool enableManualTest = false );
 	~TestApp();
-	int Main() override;
 
 	bool InstallService();
 	bool UninstallService();

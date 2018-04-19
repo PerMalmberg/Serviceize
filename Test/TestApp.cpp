@@ -6,7 +6,7 @@ using namespace std::chrono_literals;
 using namespace serviceize;
 
 TestApp::TestApp( bool enableManualTest )
-	: TestApp( enableManualTest, 0, nullptr )
+	: TestApp( 0, nullptr, enableManualTest)
 {
 
 }
@@ -19,11 +19,6 @@ TestApp::TestApp( int argc, const char* argv[], bool enableManualTest )
 
 TestApp::~TestApp()
 {
-}
-
-int TestApp::Main()
-{
-	return 1;
 }
 
 bool TestApp::InstallService()

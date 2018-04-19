@@ -5,9 +5,10 @@
 #include "targetver.h"
 #include <chrono>
 #include <thread>
+#include <iostream>
 
 #define CATCH_CONFIG_RUNNER
-#include "Catch/include/catch.hpp"
+#include <Catch/single_include/catch.hpp>
 #include "TestApp.h"
 
 using namespace std::chrono_literals;
@@ -61,7 +62,7 @@ int main( int argc, const char* argv[] )
 	}
 	else
 	{
-		result = result = Catch::Session().run( argc, argv );
+		result = Catch::Session().run( argc, const_cast<char**>(argv) );
 	}
 
 

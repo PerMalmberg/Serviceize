@@ -23,8 +23,6 @@ public:
 	static int Application::RunConsole( Application& app );
 
 protected:
-	// Method called once the application is initialized, possible as a service.
-	virtual int Main() = 0;
 	bool IsService() const { return myIsService; }
 
 #ifdef UNICODE
