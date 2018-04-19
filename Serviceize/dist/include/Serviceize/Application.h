@@ -88,6 +88,7 @@ private:
 	static void WINAPI ServiceCtrlHandler( DWORD ctrl );
 
 	// This function is called whenever a control code received from the command prompt
+    // Note: this call is made from another thread! https://docs.microsoft.com/en-us/windows/console/handlerroutine
 	static BOOL WINAPI ConsoleSignalRoutine( DWORD control );
 
 	void SetStatus( DWORD currentState,	DWORD exitCode = NO_ERROR, DWORD waitHint = 0 );

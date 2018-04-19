@@ -233,6 +233,7 @@ void Application::Start()
 	}
 	else
 	{
+        SetConsoleCtrlHandler(&ConsoleSignalRoutine, TRUE);
 		OnStart( myArguments );
 	}
 }
